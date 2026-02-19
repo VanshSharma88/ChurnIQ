@@ -42,3 +42,6 @@ streamlit run app.py
 -   `src/data_loader.py`: Handles CSV loading and 'Churn' label creation.
 -   `src/pipeline.py`: Scikit-Learn pipelines for preprocessing (OneHotEncoding, Scaling).
 -   `src/evaluation.py`: Metrics (Accuracy, AUC) and Confusion Matrix potting.
+
+
+## 📊 Visualizations
