@@ -1,14 +1,3 @@
-"""
-pipeline.py
------------
-This file builds a Scikit-Learn "Pipeline" — a chain of steps that:
-  Step 1: Preprocesses the data (cleans, scales, and encodes it)
-  Step 2: Trains a machine learning model on the processed data
-
-Why a Pipeline? So that preprocessing + model training happen in one clean step,
-avoiding errors like accidentally scaling test data with training stats.
-"""
-
 # Pipeline chains multiple steps together (like an assembly line)
 from sklearn.pipeline import Pipeline
 
