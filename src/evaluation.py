@@ -28,6 +28,7 @@ def evaluate_model(model, X_test, y_test):
     Returns:
     - metrics : a dictionary with Accuracy, Precision, Recall, AUC scores
     - y_pred  : the model's predicted labels (used for confusion matrix)
+    - z_test : the model's Prediced Labels (Used for recomendation matrix)
     """
 
     # Ask the model to make predictions on the test set
