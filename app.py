@@ -50,13 +50,32 @@ p, span, div, label, li {
 div[data-baseweb="tab-list"] {
     background: #16213E;
     border-radius: 14px;
-    padding: 5px;
-    gap: 4px;
+    padding: 6px;
+    gap: 6px;
+    display: flex !important;
+}
+div[data-baseweb="tab-list"] > button {
+    flex: 1 !important;
 }
 div[data-baseweb="tab"] {
     border-radius: 10px !important;
     font-weight: 600 !important;
     font-size: 15px !important;
+    padding: 12px 24px !important;
+    justify-content: center !important;
+}
+div[data-baseweb="tab"][aria-selected="true"] {
+    background: linear-gradient(135deg, #4F46E5, #6C63FF) !important;
+    color: #FFFFFF !important;
+}
+div[data-baseweb="tab-panel"] {
+    padding-top: 1.5rem !important;
+}
+div[data-baseweb="tab-highlight"] {
+    display: none !important;
+}
+div[data-baseweb="tab-border"] {
+    display: none !important;
 }
 
 /* Hero */
@@ -519,8 +538,8 @@ def show_dashboard(df):
         with cfg1:
             model_type = st.selectbox(
                 "🤖 Algorithm",
-                ["LogisticRegression", "DecisionTree"],
-                help="LogisticRegression: fast linear model · DecisionTree: interpretable rule-based model"
+                ["LogisticRegression", "DecisionTree", "RandomForest"],
+                help="LogisticRegression: fast linear model · DecisionTree: interpretable rule-based model · RandomForest: powerful ensemble of trees"
             )
         with cfg2:
             test_size = st.slider("🔀 Test Split Size", 0.10, 0.40, 0.20, 0.05,
@@ -532,7 +551,8 @@ def show_dashboard(df):
         # Algorithm info
         algo_desc = {
             "LogisticRegression": "Finds a linear decision boundary separating churners from retained players. Fast, explainable, and works well on linearly separable data.",
-            "DecisionTree": "Builds a tree of yes/no rules (max depth = 5) to classify players. Highly interpretable — great for explaining predictions."
+            "DecisionTree": "Builds a tree of yes/no rules (max depth = 5) to classify players. Highly interpretable — great for explaining predictions.",
+            "RandomForest": "An ensemble of 100 decision trees — each tree votes and the majority wins. More robust and accurate than a single tree, with built-in protection against overfitting."
         }
         st.markdown(f'<div class="info-box">💡 <strong>{model_type}</strong> — {algo_desc[model_type]}</div>',
                     unsafe_allow_html=True)

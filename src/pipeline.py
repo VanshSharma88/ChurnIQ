@@ -16,6 +16,10 @@ from sklearn.linear_model import LogisticRegression
 # (very interpretable — you can visualise the actual decision rules)
 from sklearn.tree import DecisionTreeClassifier
 
+# Random Forest: an ensemble of many decision trees — each tree votes,
+# and the majority vote wins. More accurate & robust than a single tree.
+from sklearn.ensemble import RandomForestClassifier
+
 
 def create_pipeline(numerical_features, categorical_features, model_type='LogisticRegression'):
     """
@@ -24,7 +28,7 @@ def create_pipeline(numerical_features, categorical_features, model_type='Logist
     Parameters:
     - numerical_features  : list of column names that contain numbers
     - categorical_features: list of column names that contain text/categories
-    - model_type          : which algorithm to use ('LogisticRegression' or 'DecisionTree')
+    - model_type          : which algorithm to use ('LogisticRegression', 'DecisionTree', or 'RandomForest')
 
     Returns:
     - A Scikit-Learn Pipeline object (ready to be trained with .fit())
@@ -62,6 +66,11 @@ def create_pipeline(numerical_features, categorical_features, model_type='Logist
         # Decision Tree with max_depth=5 to prevent overfitting
         # (overfitting = model memorises training data but fails on new data)
         model = DecisionTreeClassifier(max_depth=5, random_state=42)
+    elif model_type == 'RandomForest':
+        # Random Forest: 100 trees (default), each trained on a random subset
+        # of data + features. Reduces variance compared to a single tree.
+        # max_depth=10 keeps individual trees from growing too deep.
+        model = RandomForestClassifier(n_estimators=100, max_depth=10, random_state=42)
     else:
         # Default: Logistic Regression
         # max_iter=1000 → allow up to 1000 iterations to find the best fit
