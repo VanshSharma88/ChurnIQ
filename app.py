@@ -1,3 +1,7 @@
+"""
+app.py — Main Streamlit application for ChurnIQ: Player Churn Prediction
+Run with: python3 -m streamlit run app.py
+"""
 
 import streamlit as st
 import pandas as pd
@@ -6,10 +10,16 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import seaborn as sns
 from sklearn.model_selection import train_test_split
+from dotenv import load_dotenv
+import os
 
 from src.data_loader import load_data, get_feature_lists
 from src.pipeline import create_pipeline
 from src.evaluation import evaluate_model, plot_confusion_matrix
+from src.agent import build_agent_graph
+
+# Load environment variables
+load_dotenv()
 
 # ── Page Config ────────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -50,32 +60,13 @@ p, span, div, label, li {
 div[data-baseweb="tab-list"] {
     background: #16213E;
     border-radius: 14px;
-    padding: 6px;
-    gap: 6px;
-    display: flex !important;
-}
-div[data-baseweb="tab-list"] > button {
-    flex: 1 !important;
+    padding: 5px;
+    gap: 4px;
 }
 div[data-baseweb="tab"] {
     border-radius: 10px !important;
     font-weight: 600 !important;
     font-size: 15px !important;
-    padding: 12px 24px !important;
-    justify-content: center !important;
-}
-div[data-baseweb="tab"][aria-selected="true"] {
-    background: linear-gradient(135deg, #4F46E5, #6C63FF) !important;
-    color: #FFFFFF !important;
-}
-div[data-baseweb="tab-panel"] {
-    padding-top: 1.5rem !important;
-}
-div[data-baseweb="tab-highlight"] {
-    display: none !important;
-}
-div[data-baseweb="tab-border"] {
-    display: none !important;
 }
 
 /* Hero */
@@ -268,15 +259,24 @@ div[data-baseweb="tab-border"] {
 </style>
 """, unsafe_allow_html=True)
 
-# ── Session state ──────────────────────────────────────────────────────────────
 if 'df' not in st.session_state:
     st.session_state['df'] = None
+
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # LANDING PAGE
 # ══════════════════════════════════════════════════════════════════════════════
 def show_landing():
+    # ── Sidebar for API Key ───────────────────────────────────────────────────
+    with st.sidebar:
+        st.markdown('### 🔑 Agent Configuration')
+        groq_key = st.text_input("Groq API Key (Optional if loaded from .env)", type="password")
+        if groq_key:
+            os.environ["GROQ_API_KEY"] = groq_key
+        st.markdown('---')
+        st.markdown('This End-Sem feature uses LangGraph to generate an Agentic Retrieval-Augmented Engagement strategy.')
+        
     # ── Hero ──────────────────────────────────────────────────────────────────
     st.markdown("""
     <div style="padding: 2rem 0 1rem 0;">
@@ -538,8 +538,8 @@ def show_dashboard(df):
         with cfg1:
             model_type = st.selectbox(
                 "🤖 Algorithm",
-                ["LogisticRegression", "DecisionTree", "RandomForest"],
-                help="LogisticRegression: fast linear model · DecisionTree: interpretable rule-based model · RandomForest: powerful ensemble of trees"
+                ["LogisticRegression", "DecisionTree"],
+                help="LogisticRegression: fast linear model · DecisionTree: interpretable rule-based model"
             )
         with cfg2:
             test_size = st.slider("🔀 Test Split Size", 0.10, 0.40, 0.20, 0.05,
@@ -551,8 +551,7 @@ def show_dashboard(df):
         # Algorithm info
         algo_desc = {
             "LogisticRegression": "Finds a linear decision boundary separating churners from retained players. Fast, explainable, and works well on linearly separable data.",
-            "DecisionTree": "Builds a tree of yes/no rules (max depth = 5) to classify players. Highly interpretable — great for explaining predictions.",
-            "RandomForest": "An ensemble of 100 decision trees — each tree votes and the majority wins. More robust and accurate than a single tree, with built-in protection against overfitting."
+            "DecisionTree": "Builds a tree of yes/no rules (max depth = 5) to classify players. Highly interpretable — great for explaining predictions."
         }
         st.markdown(f'<div class="info-box">💡 <strong>{model_type}</strong> — {algo_desc[model_type]}</div>',
                     unsafe_allow_html=True)
@@ -663,43 +662,97 @@ def show_dashboard(df):
                     'SessionsPerWeek': [sessions], 'AvgSessionDurationMinutes': [avg_dur],
                     'PlayerLevel': [level], 'AchievementsUnlocked': [achievements]
                 })
-                pipe      = st.session_state['pipeline']
-                prediction = pipe.predict(input_df)[0]
-                proba      = pipe.predict_proba(input_df)[0][1]
-
+                pipe = st.session_state['pipeline']
+                
+                # Setup Agent
+                agent = build_agent_graph(pipe)
+                
+                initial_state = {
+                    "player_data": input_df.iloc[0].to_dict(),
+                    "churn_proba": 0.0,
+                    "is_churn": False,
+                    "retrieved_strategies": [],
+                    "structured_evaluation": {},
+                    "error": ""
+                }
+                
+                st.markdown("<br><hr>", unsafe_allow_html=True)
+                st.markdown("### 🤖 Agent Execution Log")
+                
+                # Run the LangGraph
+                progress_container = st.empty()
+                with progress_container.container():
+                    st.info("🧠 Initializing agent risk prediction...")
+                    
+                final_state = initial_state
+                for event in agent.stream(initial_state):
+                    for key, value in event.items():
+                        if key == "predict_risk":
+                            with progress_container.container():
+                                proba = value.get("churn_proba", 0)
+                                is_churn = value.get("is_churn", False)
+                                risk_str = "HIGH" if is_churn else "LOW"
+                                stat_color = "red" if is_churn else "green"
+                                st.warning(f"🔍 **Risk Predicted:** :{stat_color}[{risk_str} ({proba:.1%})]")
+                                if is_churn:
+                                    st.info("📚 Consulting FAISS knowledge base for strategies...")
+                        elif key == "retrieve_knowledge":
+                            with progress_container.container():
+                                strats = value.get("retrieved_strategies", [])
+                                st.success(f"✅ Extracted {len(strats)} relevant strategies.")
+                                st.info("✍️ Synthesizing retention plan using LLM...")
+                        elif key == "generate_plan":
+                            with progress_container.container():
+                                if value.get("error"):
+                                    st.error(f"❌ {value['error']}")
+                                else:
+                                    st.success("✨ Retention blueprint finalized!")
+                        final_state = value
+                
                 st.markdown("<br>", unsafe_allow_html=True)
-                res_col, _ = st.columns([1, 1])
-                with res_col:
-                    if prediction == 1:
-                        st.markdown(f"""
-                        <div class="result-high">
-                            <div style="font-size:3rem; margin-bottom:0.5rem;">⚠️</div>
-                            <div style="font-size:1.5rem; font-weight:800; color:#FCA5A5; margin-bottom:0.5rem;">
-                                High Churn Risk
-                            </div>
-                            <div style="font-size:3rem; font-weight:800; color:#EF4444; line-height:1;">
-                                {proba:.1%}
-                            </div>
-                            <div style="color:#9CA3AF; font-size:14px; margin-top:1rem;">
-                                This player is likely to disengage soon.<br>
-                                Consider sending a personalised retention offer or reward.
-                            </div>
-                        </div>""", unsafe_allow_html=True)
-                    else:
-                        st.markdown(f"""
-                        <div class="result-low">
-                            <div style="font-size:3rem; margin-bottom:0.5rem;">✅</div>
-                            <div style="font-size:1.5rem; font-weight:800; color:#6EE7B7; margin-bottom:0.5rem;">
-                                Low Churn Risk
-                            </div>
-                            <div style="font-size:3rem; font-weight:800; color:#10B981; line-height:1;">
-                                {proba:.1%}
-                            </div>
-                            <div style="color:#9CA3AF; font-size:14px; margin-top:1rem;">
-                                This player appears highly engaged.<br>
-                                Keep up the great experience!
-                            </div>
-                        </div>""", unsafe_allow_html=True)
+                
+                # Final output display
+                if final_state.get('error'):
+                    st.error(f"Execution Error: {final_state['error']}")
+                elif final_state.get("is_churn") == False:
+                    st.markdown(f"""
+                    <div class="result-low">
+                        <div style="font-size:3rem; margin-bottom:0.5rem;">✅</div>
+                        <div style="font-size:1.5rem; font-weight:800; color:#6EE7B7; margin-bottom:0.5rem;">
+                            Low Churn Risk
+                        </div>
+                        <div style="font-size:3rem; font-weight:800; color:#10B981; line-height:1;">
+                            {final_state.get('churn_proba'):.1%}
+                        </div>
+                        <div style="color:#9CA3AF; font-size:14px; margin-top:1rem;">
+                            This player appears highly engaged. Keep up the great experience!
+                        </div>
+                    </div>""", unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                    <div class="result-high">
+                        <div style="font-size:3rem; margin-bottom:0.5rem;">⚠️</div>
+                        <div style="font-size:1.5rem; font-weight:800; color:#FCA5A5; margin-bottom:0.5rem;">
+                            High Churn Risk
+                        </div>
+                        <div style="font-size:3rem; font-weight:800; color:#EF4444; line-height:1;">
+                            {final_state.get('churn_proba'):.1%}
+                        </div>
+                    </div>""", unsafe_allow_html=True)
+                    
+                    eval_data = final_state.get("structured_evaluation", {})
+                    st.markdown("### 📝 Agentic Structured Output")
+                    
+                    with st.container(border=True):
+                        st.markdown(f"#### 📊 Summary: Player Behavior Overview\n{eval_data.get('Summary', 'N/A')}")
+                        st.markdown("---")
+                        st.markdown(f"#### 🧠 Analysis: Churn Risk Interpretation\n{eval_data.get('Analysis', 'N/A')}")
+                        st.markdown("---")
+                        st.markdown(f"#### 🎯 Plan: Engagement & Retention Recs\n{eval_data.get('Plan', 'N/A')}")
+                        st.markdown("---")
+                        st.markdown(f"#### 🔗 Refs: Supporting References\n*{eval_data.get('Refs', 'N/A')}*")
+                        
+                    st.warning(f"**⚠️ Disclaimer:** {eval_data.get('Disclaimer', 'N/A')}")
 
 
 # ── Router ─────────────────────────────────────────────────────────────────────
