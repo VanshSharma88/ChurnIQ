@@ -1,0 +1,9 @@
+strategy_id,target_audience,scenario,recommended_action,expected_outcome
+1,Beginners,"Low Level, Low Playtime",Offer a 'Welcome Back' 2x XP booster bundle for their next 3 sessions,Accelerated progression to hook player
+2,Veterans,"High Level, Declining Playtime",Unlock an exclusive high-tier cosmetic quest line,Renewed interest through exclusive end-game rewards
+3,Spenders,"High In-Game Purchases, Dropping Sessions",Provide a personalized discount on premium currency or next major expansion,Capitalize on willingness to pay by offering perceived value
+4,Casuals,"Medium Level, Low Weekly Sessions",Send push notification about a weekend-only casual community event,Increase weekend active users and social engagement
+5,Strugglers,"High Difficulty, Low Achievements",Offer a one-time free revival or difficulty-adjustment perk,Reduce frustration and prevent rage-quitting
+6,Socialites,"Low Playtime, No Clan",Prompt them to join a clan with a 10% bonus gold incentive,Increase retention by building social ties
+7,Grinders,"High Sessions, No Purchases",Offer a highly discounted starter pack,Convert free user to paid user with a high-value low-cost offer
+8,Burnouts,"Very High Sessions, Suddenly Stopped",Do not send immediate notifications. Wait 7 days and offer a 'We Miss You' exclusive login reward,Provide a cooling-off period before re-engaging softly

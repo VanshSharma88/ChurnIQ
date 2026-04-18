@@ -4,3 +4,11 @@ numpy
 scikit-learn
 matplotlib
 seaborn
+langchain
+langchain-community
+langchain-huggingface
+langgraph
+langchain-groq
+faiss-cpu
+sentence-transformers
+python-dotenv
