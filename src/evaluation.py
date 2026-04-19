@@ -1,3 +1,15 @@
+"""
+evaluation.py
+-------------
+This file contains functions to measure how well our ML model performs.
+
+Key metrics explained:
+- Accuracy  : % of all predictions that were correct
+- Precision : Of all players we called "Churn", how many actually churned?
+- Recall    : Of all players who actually churned, how many did we catch?
+- AUC-ROC   : Overall ability to separate churners from non-churners (1.0 = perfect)
+"""
+
 # pandas and numpy for data manipulation
 import pandas as pd
 import numpy as np
@@ -28,7 +40,6 @@ def evaluate_model(model, X_test, y_test):
     Returns:
     - metrics : a dictionary with Accuracy, Precision, Recall, AUC scores
     - y_pred  : the model's predicted labels (used for confusion matrix)
-    - z_test : the model's Prediced Labels (Used for recomendation matrix)
     """
 
     # Ask the model to make predictions on the test set

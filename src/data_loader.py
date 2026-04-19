@@ -10,6 +10,8 @@ This file is responsible for:
 # We import pandas, a library that helps us work with tables (like Excel in Python)
 
 import pandas as pd
+
+
 def load_data(source):
     """
     This function loads the dataset from a CSV file.
@@ -25,6 +27,7 @@ def load_data(source):
     except Exception:
         # If the file can't be read, return nothing (None)
         return None
+
     # Check if the dataset has the 'EngagementLevel' column (we need it to create Churn)
     if 'EngagementLevel' in df.columns:
         # Create a new column called 'Churn'
@@ -34,6 +37,7 @@ def load_data(source):
     else:
         # If the column doesn't exist, we can't create Churn, so return None
         return None
+
     # Return the processed table
     return df
 
@@ -48,7 +52,6 @@ def get_feature_lists():
     'PlayerID' and 'EngagementLevel' are excluded because:
     - PlayerID is just an ID (meaningless for prediction)
     - EngagementLevel is what we used to CREATE Churn (so we can't use it again)
-    ---- ENgageMent Level for the Greatest 
     """
 
     # These columns contain numbers — the model will scale them
