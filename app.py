@@ -538,8 +538,8 @@ def show_dashboard(df):
         with cfg1:
             model_type = st.selectbox(
                 "🤖 Algorithm",
-                ["LogisticRegression", "DecisionTree"],
-                help="LogisticRegression: fast linear model · DecisionTree: interpretable rule-based model"
+                ["LogisticRegression", "DecisionTree", "RandomForest"],
+                help="LogisticRegression: fast linear model · DecisionTree: interpretable rule-based model · RandomForest: powerful ensemble model"
             )
         with cfg2:
             test_size = st.slider("🔀 Test Split Size", 0.10, 0.40, 0.20, 0.05,
@@ -551,7 +551,8 @@ def show_dashboard(df):
         # Algorithm info
         algo_desc = {
             "LogisticRegression": "Finds a linear decision boundary separating churners from retained players. Fast, explainable, and works well on linearly separable data.",
-            "DecisionTree": "Builds a tree of yes/no rules (max depth = 5) to classify players. Highly interpretable — great for explaining predictions."
+            "DecisionTree": "Builds a tree of yes/no rules (max depth = 5) to classify players. Highly interpretable — great for explaining predictions.",
+            "RandomForest": "Builds an ensemble of multiple decision trees to improve accuracy and prevent overfitting. Powerful and robust, standard for ML."
         }
         st.markdown(f'<div class="info-box">💡 <strong>{model_type}</strong> — {algo_desc[model_type]}</div>',
                     unsafe_allow_html=True)

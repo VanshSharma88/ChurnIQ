@@ -27,6 +27,9 @@ from sklearn.linear_model import LogisticRegression
 # (very interpretable — you can visualise the actual decision rules)
 from sklearn.tree import DecisionTreeClassifier
 
+# Random Forest: powerful ensemble model that builds multiple decision trees
+from sklearn.ensemble import RandomForestClassifier
+
 
 def create_pipeline(numerical_features, categorical_features, model_type='LogisticRegression'):
     """
@@ -73,6 +76,9 @@ def create_pipeline(numerical_features, categorical_features, model_type='Logist
         # Decision Tree with max_depth=5 to prevent overfitting
         # (overfitting = model memorises training data but fails on new data)
         model = DecisionTreeClassifier(max_depth=5, random_state=42)
+    elif model_type == 'RandomForest':
+        # Random Forest aggregates multiple trees for robustness
+        model = RandomForestClassifier(random_state=42, n_estimators=100, max_depth=10)
     else:
         # Default: Logistic Regression
         # max_iter=1000 → allow up to 1000 iterations to find the best fit
